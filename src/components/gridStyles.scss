@@ -1,0 +1,17 @@
+$header-foreground-color: #000000;
+$ag-icons-path: "~ag-grid-community/src/styles/ag-theme-balham/icons/";
+$border-color: #CECECE;
+$row-border-width: 2px;
+
+@import "~ag-grid-community/src/styles/ag-grid.scss";
+@import "~ag-grid-community/src/styles/ag-theme-balham/sass/ag-theme-balham.scss";
+
+
+.ag-row-hover {
+  /* putting in !important so it overrides the theme's styling as it hovers the row also */
+  background-color: #7fe2ff !important;
+}
+
+.ag-column-hover {
+  background-color: #cce8ff;
+}

@@ -18,7 +18,6 @@
 import {AgGridVue} from 'ag-grid-vue';
 import 'ag-grid-enterprise';
 import {LicenseManager} from "ag-grid-enterprise";
-import * as _ from "lodash";
 
 LicenseManager.setLicenseKey("Evaluation_License-_Not_For_Production_Valid_Until_7_March_2019__MTU1MTkxNjgwMDAwMA==401412254de511491000d2684e818e25");
 export default {
@@ -206,7 +205,7 @@ function filterData(filterModel, data) {
 function group(data, rowGroupColIds, groupKeys, parentId) {
     let groupColId = rowGroupColIds.shift();
     if (!groupColId) return data;
-    let groupedData = _.groupBy(data, groupColId);
+    let groupedData = groupByCol(data, groupColId);
     if (groupKeys.length === 0) {
         return Object.keys(groupedData).map(key => {
             let res = {};
@@ -216,6 +215,13 @@ function group(data, rowGroupColIds, groupKeys, parentId) {
         });
     }
     return group(groupedData[groupKeys.shift()], rowGroupColIds, groupKeys, parentId);
+}
+
+function groupByCol(data, groupColId) {
+    return data.reduce((result, item) => {
+        (result[item[groupColId]] = result[item[groupColId]] || []).push(item);
+        return result;
+    }, {});
 }
 
 function getGroupId(parentId, key) {

@@ -34,14 +34,16 @@
 <script>
 /*import GridComponent from './components/GridComponent.vue';
 import GridComponentInfiniteScroll from './components/GridComponentInfiniteScroll';*/
-import GridComponentServerSide from './components/GridComponentServerSide'
+import GridComponentServerSide from './components/GridComponentServerSide';
+const getData = () => import('./data/data.json').then(m => m.default || m);
+
 
 export default {
   name: 'app',
   components: {
     GridComponentServerSide
   },
-  data: function () {
+  data() {
     return {
       initFinished: false,
       rowData: [],
@@ -84,7 +86,7 @@ export default {
     this.httpGetData();
   },
   methods: {
-    httpGetData: function() {
+    async httpGetData() {
       /*
       let username = 'interview_1';
       let password = 'int_candidate12';
@@ -95,26 +97,22 @@ export default {
       })
        */
       // Getting the copy of data from localhost as the server is down now.
-      const requestUrl = process.env.NODE_ENV === 'production'
-          ? '/task_zeo_agency_first/data/data.json'
-          : '/data/data.json';
-      this.$http.get(requestUrl).then((response) => {
-        this.analyzeData(response.body);
-        this.initFinished = true;
-      });
+      const data = await getData();
+      this.analyzeData(data);
+      this.initFinished = true;
     },
-    analyzeData: function (dataJson) {
-      for(let index in dataJson) {
-        this.checkExists(this.keywordGrouped, dataJson[index], 'keyword');
-        this.checkExists(this.pagesGrouped, dataJson[index], 'url');
-        this.checkExists(this.countryGrouped, dataJson[index], 'country');
-        this.checkExists(this.deviceGrouped, dataJson[index], 'device');
-        let newObj = {...dataJson[index]};
+    analyzeData(dataJson) {
+      Object.values(dataJson).forEach(item => {
+        this.checkExists(this.keywordGrouped, item, 'keyword');
+        this.checkExists(this.pagesGrouped, item, 'url');
+        this.checkExists(this.countryGrouped, item, 'country');
+        this.checkExists(this.deviceGrouped, item, 'device');
+        let newObj = {...item};
         newObj['ctr'] = (newObj.clicks / newObj.impressions).toFixed(4);
         this.rowDataAll.push(newObj);
-      }
+      });
     },
-    checkExists: function(checkArray, checkObj, checkStr) {
+    checkExists(checkArray, checkObj, checkStr) {
       let found = checkArray.find(x => x[checkStr] === checkObj[checkStr]);
       if(found) {
         found.clicks += checkObj.clicks;
@@ -130,7 +128,7 @@ export default {
         checkArray.push(newObj);
       }
     },
-    buttonClick: function (clickedButton) {
+    buttonClick(clickedButton) {
       let columnDefs = [];
       switch (clickedButton) {
         case 'keyword':
@@ -227,15 +225,15 @@ export default {
       this.columnDefs = columnDefs;
       this.clickedButton = clickedButton;
     },
-    gridInitFinished: function () {
+    gridInitFinished() {
       this.$refs.gridComponent.gridApi.sizeColumnsToFit();
     },
-    buttonClassObj: function (button) {
+    buttonClassObj(button) {
       return {
         selectedButton: this.clickedButton === button
       }
     },
-    getFilterData: function (source, str) {
+    getFilterData(source, str) {
       let length = source.length, result = [], seen = new Set();
       for (let index = 0; index < length; index++) {
         let value = source[index][str];
